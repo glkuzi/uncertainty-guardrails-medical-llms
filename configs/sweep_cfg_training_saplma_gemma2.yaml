@@ -1,0 +1,21 @@
+# sweep_config.yaml
+program: train_luq/run_train_luq.py  # The script you want to execute
+method: bayes
+metric:
+  name: eval/f1
+  goal: maximize
+parameters:
+  training_arguments.learning_rate:
+      values: [5e-4, 1e-4, 5e-5, 1e-5]
+  training_arguments.warmup_ratio:
+      values: [0.0, 0.05, 0.1]
+  training_arguments.num_train_epochs:
+      values: [2, 3, 4, 5, 10]
+  ue_layer.pos_weight:
+      values: [4.0, 5.0, 6.0]
+command:
+  - ${interpreter}
+  - ${program}
+  - --config-path=../configs
+  - --config-name=run_train_luq_saplma_gemma2.yaml
+  - ${args_no_hyphens}

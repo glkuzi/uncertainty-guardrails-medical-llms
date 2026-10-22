@@ -1,0 +1,53 @@
+hydra:
+  run:
+    dir: ${output_dir}/train/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+model:
+  pretrained_model_name_or_path: mistralai/Mistral-7B-Instruct-v0.2
+  device_map: cuda
+  trust_remote_code: true
+  torch_dtype: "torch.float16"
+
+ue_layer:
+  path: ""
+  pos_weight: 6.0
+  output_attention: true
+  feature_extractors:
+    - name: luq.feature_extractors.basic_hidden_states
+      layer_nums: [-1]
+    - name: luq.feature_extractors.basic_attention
+      layer_nums: "all"
+      #layer_nums: [-1, -3, -5]
+
+  head_config:
+    head_dim: 4096
+    n_layers: 2
+    n_heads: 32
+    dropout: 0.1
+    enable_feature_projection_layer: true
+    interim_dim: 1024
+
+dataset:
+  #path: "hf:Artem/akim_dataset_full"
+  #path: "hf:Artem/akim_dataset_full_fixed"
+  path: "./workdir/datasets/akim_full_dataset_fixed"
+  num_instances: 0
+  test_size: 0
+
+training_arguments:
+  num_train_epochs: 7
+  learning_rate: 1e-4
+  warmup_ratio: 0.05
+  weight_decay: 0.1
+  gradient_accumulation_steps: 7
+  per_device_train_batch_size: 4
+  max_grad_norm: 1.
+
+do_train: true
+do_eval: true
+do_hyperopt: false
+do_save_checkpoints: false
+
+output_dir: ./workdir
+
+report_to: wandb 

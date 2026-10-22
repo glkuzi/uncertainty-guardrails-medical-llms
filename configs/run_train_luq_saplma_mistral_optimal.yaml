@@ -1,0 +1,37 @@
+model:
+  pretrained_model_name_or_path: mistralai/Mistral-7B-Instruct-v0.2
+  device_map: cuda
+  trust_remote_code: true
+  torch_dtype: torch.float16
+ue_layer:
+  path: ''
+  pos_weight: 4
+  output_attention: true
+  head_cfg:
+    head_type: saplma
+    feature_extractor:
+    - name: luq.feature_extractors.basic_hidden_states
+      layer_nums: -1
+    uncertainty_head:
+      internal_dim1: 256
+      internal_dim2: 128
+      internal_dim3: 64
+dataset:
+  path: hf:llm-uncertainty-head/train_akimbio_mistral
+  num_instances: 0
+  test_size: 0.0
+training_arguments:
+  num_train_epochs: 10
+  learning_rate: 0.0001
+  warmup_ratio: 0.1
+  weight_decay: 0.1
+  gradient_accumulation_steps: 7
+  per_device_train_batch_size: 4
+  max_grad_norm: 1.0
+do_train: true
+do_eval: true
+do_hyperopt: false
+do_save_checkpoints: false
+do_save_final_model: true
+report_to: wandb
+output_dir: ./workdir

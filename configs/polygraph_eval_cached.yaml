@@ -1,0 +1,69 @@
+hydra:
+  run:
+    dir: ${cache_path}/${task}/${model.path}/${dataset}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+defaults:
+  - model: mistral-instruct-v2
+
+task: bio
+dataset: ['llm-uncertainty-head/train_akimbio_mistral']
+text_column: question
+eval_split: test
+load_from_disk: false
+subsample_eval_dataset: -1
+use_claim_ue: true
+
+generation_metrics: [{
+  'name': 'OpenAIFactCheck',
+  'args': {'gpt-4o'},
+  'kwargs': {'n_threads': 16}
+}]
+
+estimators:
+  - name: RandomBaselineClaim
+  - name: MaximumClaimProbability
+  - name: luq.builder_LuqClaimEstimator
+    cfg: 
+      reduce_type: "mean"
+  - name: luq.builder_LuqClaimEstimator
+    cfg: 
+      reduce_type: "mean_logits"
+  - name: luq.builder_LuqClaimEstimator
+    cfg: 
+      reduce_type: "prod_geom"
+  - name: luq.builder_LuqClaimEstimator
+    cfg: 
+      reduce_type: "max"
+
+stat_calculators:
+  - name: Cached
+    builder: luq.builder_CachedPredictionsCalculator
+    cfg:
+      #cached_predictions_path: "/home/artemshelmanov/workspace/projects/luq-prod/outputs/2025-02-07/02-15-08/predictions"
+      cached_predictions_path: "/home/artemshelmanov/workspace/projects/luq-prod/outputs/2025-02-06/23-05-54/predictions"
+      dataset_path: "llm-uncertainty-head/train_akimbio_mistral"
+    stats:
+      - "input_texts"
+      - "input_tokens"
+      - "hidden_states"
+      - "greedy_log_probs"
+      - "greedy_logits"
+      - "greedy_tokens"
+      - "greedy_texts"
+      - "greedy_log_likelihoods"
+      - "greedy_tokens_alternatives"
+      - "uhead_features"
+    dependencies:
+
+max_new_tokens: 230
+ignore_exceptions: false
+language: en
+batch_size: 1
+seed:
+    - 1
+cache_path: ./workdir/cache
+save_path: '${hydra:run.dir}'
+report_to_wandb: false
+
+n_threads: 16
+log_time: true

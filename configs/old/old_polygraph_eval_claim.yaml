@@ -1,0 +1,110 @@
+hydra:
+  run:
+    dir: ${cache_path}/${task}/${model.path}/${dataset}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+defaults:
+  - model: mistral-instruct-v2
+
+cache_path: ./workdir/output
+save_path: '${hydra:run.dir}'
+
+task: bio
+
+dataset_name: person-bio
+dataset: [rediska0123/person-bio]
+n_shot: 0
+text_column: question
+eval_split: test
+max_new_tokens: 256
+load_from_disk: false
+train_dataset: null
+train_test_split: false
+test_split_size: 1
+subsample_eval_dataset: -1
+
+use_density_based_ue: false
+use_seq_ue: false
+use_tok_ue: false
+use_ens_ue: false
+use_claim_ue: true
+generation_metrics: [{
+  'name': 'OpenAIFactCheck'
+}]
+
+estimators:
+  - name: RandomBaselineClaim
+  - name: MaximumClaimProbability
+  - name: ClaimConditionedProbabilityClaim
+  - name: luq.builder_LuqClaimEstimator
+    cfg: 
+      reduce_type: "mean"
+  - name: luq.builder_LuqClaimEstimator
+    cfg: 
+      reduce_type: "mean_logits"
+  - name: luq.builder_LuqClaimEstimator
+    cfg: 
+      reduce_type: "prod_geom"
+  - name: luq.builder_LuqClaimEstimator
+    cfg: 
+      reduce_type: "mean"
+      reverse_predictions: true
+  - name: luq.builder_LuqClaimEstimator
+    cfg: 
+      reduce_type: "mean_logits"
+      reverse_predictions: true
+  - name: luq.builder_LuqClaimEstimator
+    cfg: 
+      reduce_type: "prod_geom"
+      reverse_predictions: true
+
+stat_calculators:
+  - auto
+  - name: ClaimExtractor
+    builder: lm_polygraph.defaults.stat_calculator_builders.default_ClaimsExtractor
+    cfg:
+      openai_model: "gpt-4"
+      cache_path: "./workdir/cache"
+    stats: 
+      - "claims"
+      - "claim_texts_concatenated"
+      - "claim_input_texts_concatenated"
+    dependencies:
+      - "greedy_texts"
+      - "greedy_tokens"
+  - name: Luq
+    builder: luq.builder_InferLuqCalculator
+    cfg:
+      feature_extractors:
+      - name: luq.feature_extractors.basic_hidden_states
+        layer_nums: [-1, -5]
+      - name: luq.feature_extractors.basic_attention
+        layer_nums: [-1, -5]
+      uncertainty_head: 
+        weights_path: "./workdir/models/ue_layer.pth"
+        output_attentions: true
+        head_config: 
+          head_dim: 4096
+          n_layers: 1
+          n_heads: 32
+          dropout: 0.1
+          enable_feature_projection_layer: true
+          interim_dim: 512
+      args_generate:
+        max_new_tokens: 254
+    stats:
+      - "hidden_states"
+      - "greedy_log_probs"
+      - "greedy_logits"
+      - "greedy_tokens"
+      - "greedy_texts"
+      - "greedy_log_likelihoods"
+      - "uncertainty_logits"
+    dependencies:
+
+
+batch_size: 1
+seed:
+    - 1
+
+ignore_exceptions: false
+report_to_wandb: true

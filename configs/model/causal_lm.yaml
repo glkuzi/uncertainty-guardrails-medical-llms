@@ -1,0 +1,10 @@
+defaults:
+  - default
+
+path: mistralai/Mistral-7B-Instruct-v0.2
+type: CausalLM
+path_to_load_script: model/default.py
+load_model_args:
+  device_map: cuda
+
+load_tokenizer_args: {}

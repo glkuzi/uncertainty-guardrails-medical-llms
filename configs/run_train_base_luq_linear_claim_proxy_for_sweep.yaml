@@ -1,0 +1,53 @@
+hydra:
+  run:
+    dir: ${output_dir}/train/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+model:
+  pretrained_model_name_or_path: mistralai/Mistral-7B-Instruct-v0.2
+  device_map: cuda
+  trust_remote_code: true
+  torch_dtype: "torch.float16"
+
+ue_layer:
+  path: ""
+  pos_weight: 5.0
+  output_attention: true
+  head_cfg:
+    head_type: "linear" 
+    feature_extractor:
+      - name: luh.feature_extractors.token_probabilities
+        top_n: 1
+      - name: luh.feature_extractors.basic_attention
+        layer_nums: all
+        attn_history_sz: 10
+        pool: false
+    uncertainty_head:
+
+dataset:
+  path: "../newly_builded_datasets/sciq_with_val_fix"
+  num_instances: 0
+  test_size: 0.2
+  validation: validation
+
+training_arguments:
+  num_train_epochs: 5
+  learning_rate: 1e-5
+  warmup_ratio: 0.
+  weight_decay: 0.1
+  gradient_accumulation_steps: 4
+  per_device_train_batch_size: 8
+  per_device_eval_batch_size: 8
+  max_grad_norm: 1.
+  load_best_model_at_end: false
+
+do_train: true
+do_eval: true
+do_predict: false
+do_hyperopt: false
+do_save_checkpoints: false
+do_save_final_model: true
+batched_predict: 0
+
+report_to: wandb
+
+output_dir: ./workdir_proxy_sweeps

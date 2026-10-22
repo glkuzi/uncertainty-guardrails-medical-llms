@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+
+from pathlib import Path
+import hydra
+import os
+
+import logging
+
+log = logging.getLogger("lm_polygraph")
+
+hydra_config = Path(os.environ["HYDRA_CONFIG"])
+
+
+def run_step(config, output_dir):
+    return os.system(f"{config.command} hydra.run.dir={output_dir}/{config.name}")
+
+
+@hydra.main(
+    version_base=None,
+    config_path=str(hydra_config.parent),
+    config_name=str(hydra_config.name),
+)
+def main(config):
+    output_dir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir
+    log.info(f"Output directory: {output_dir}")
+
+    for step in config.pipeline:
+        log.info(f"=============== Running step {step.name}... =====================")
+        ret = run_step(step, output_dir=output_dir)
+        if ret != 0:
+            log.error(f"Step {step.name} failed.")
+            return ret
+        
+        log.info(f"================ Done with step {step.name}. ====================")
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,36 @@
+# sweep_config.yaml
+program: train_luh/run_train_luh.py  # The script you want to execute
+method: bayes
+metric:
+  name: eval/pr_auc
+  goal: maximize
+parameters:
+  training_arguments.learning_rate:
+      values: [2e-4, 1e-4, 5e-5, 3e-5]
+  training_arguments.warmup_ratio:
+      values: [0.0, 0.05, 0.1]
+  training_arguments.num_train_epochs:
+      values: [2, 3, 4, 5, 6, 7, 10, 12, 15]
+  ue_layer.head_cfg.uncertainty_head.n_layers:
+        values: [1, 2]
+  ue_layer.head_cfg.uncertainty_head.n_heads:
+        values: [4, 8, 16]
+  ue_layer.pos_weight: 
+      values: [1., 2., 3., 4., 5.]
+  ue_layer.head_cfg.uncertainty_head.head_dim: 
+      values: [256, 512, 768]
+  ue_layer.head_cfg.uncertainty_head.dropout:
+      values: [0., 0.1, 0.2]
+  ue_layer.head_cfg.feature_extractor.0.attn_history_sz:
+      values: [1, 2, 3, 5, 7]
+#   ue_layer.head_cfg.feature_extractor.2.layer_nums:
+#       values: ["all", [-30, -25, -20, -15, -10, -5, -2, -1], [-30, -15, -1]]
+#   ue_layer.head_cfg.feature_extractor.3.layer_nums:
+#       values: ["all", [-30, -25, -20, -15, -10, -5, -2, -1], [-30, -15, -1]]
+command:
+  - ${interpreter}
+  - ${program}
+  - --config-path=../configs
+  - --config-name=run_train_luq_uhead_claim_att_mistral.yaml
+  - dataset.validation=test
+  - ${args_no_hyphens}

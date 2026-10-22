@@ -1,0 +1,23 @@
+# sweep_config.yaml
+program: train_luh/run_train_luh.py  # The script you want to execute
+method: bayes
+metric:
+  name: eval/prr
+  goal: maximize
+parameters:
+  training_arguments.learning_rate:
+      values: [1e-1, 1e-2, 1e-3, 2e-4, 1e-4, 5e-5, 3e-5]
+  training_arguments.warmup_ratio:
+      values: [0.0, 0.05, 0.1]
+  training_arguments.num_train_epochs:
+      values: [2, 3, 4, 5, 10, 13]
+  ue_layer.pos_weight:
+      values: [2.0, 3.0, 4.0, 5.0]
+  ue_layer.head_cfg.feature_extractor.1.attn_history_sz:
+      values: [1, 2, 3, 5]
+command:
+  - ${interpreter}
+  - ${program}
+  - --config-path=../configs
+  - --config-name=run_train_luq_linear_mistral_tad_fix_for_sweep_sciq_regression.yaml
+  - ${args_no_hyphens}

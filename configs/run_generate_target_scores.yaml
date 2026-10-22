@@ -1,0 +1,12 @@
+hydra:
+  run:
+    dir: ${output_dir}/generated_texts/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+
+dataset:
+  path: hf:llm-uncertainty-head/train_akimbio_mistral
+  num_instances: 0
+  gen_field: "reply"
+  target_field: "correct_answer"
+
+output_dir: ./workdir

@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uncertainty_for_medicine"
+dependencies = [
+    "lm_polygraph @ git+https://github.com/iinemo/lm-polygraph.git@dev",
+    "torch==2.6.0",
+    "accelerate==1.6.0",
+    "flask==3.1.0",
+    "lcsvec",
+]
+requires-python = ">=3.10"
+authors = [
+    {name = "Weakly-Supervised NLP Team", email = "kuzmin@airi.net"},
+]
+maintainers = [ 
+    {name = "Weakly-Supervised NLP Team", email = "kuzmin@airi.net"}
+]
+description = "UHead for medicine"
+readme = "README.md"
+keywords = ["uncertainty estimation"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: GPU :: NVIDIA CUDA :: 12 :: 12.6",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+]
+version = "0.0.0"
+
+[tool.setuptools]
+py-modules = []

@@ -1,0 +1,16 @@
+hydra:
+  run:
+    dir: ${output_dir}/${pipeline_name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+output_dir: ./workdir
+pipeline_name: "complex_pipeline"
+
+pipeline:
+  - name: "generate-texts"
+    command: "HYDRA_CONFIG=../configs/run_generate_texts.yaml python ./generate_dataset/run_generate_texts.py dataset.num_instances=10"
+  - name: "extract-verify"
+    command: "HYDRA_CONFIG=../configs/run_extract_verify_claims.yaml python ./generate_dataset/run_extract_verify_claims.py dataset.path=${hydra:run.dir}/generate-texts/result"
+  - name: "train-model"
+    command: "HYDRA_CONFIG=../configs/run_train_luq.yaml python ./train_luq/run_train_luq.py dataset.path=${hydra:run.dir}/extract-verify/result"
+  - name: "evaluate-model"
+    command: "HYDRA_CONFIG=../configs/polygraph_eval_claim.yaml python scripts/polygraph_eval_claim stat_calculators.2.cfg.uncertainty_head.weights_path=${hydra:run.dir}/train-model/ue_layer.pth"

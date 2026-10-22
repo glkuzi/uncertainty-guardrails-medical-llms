@@ -1,0 +1,8 @@
+transformers==4.51.3
+torch==2.6.0
+accelerate==1.6.0
+datasets==3.5.0
+flask==3.1.0
+scipy==1.15.2
+numpy==1.26.4
+pandas==2.2.3

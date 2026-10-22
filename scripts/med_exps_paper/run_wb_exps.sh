@@ -1,0 +1,3 @@
+#!/bin/bash
+bash cls_giga_lite_med_enlarged_train_claims_fixed_format_hp_split_claim_fix_intro_fix.sh;
+bash cls_giga_big_med_enlarged_train_claims_fixed_format_hp_split_claim_fix_intro_fix.sh;

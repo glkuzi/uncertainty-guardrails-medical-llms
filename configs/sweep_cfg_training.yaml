@@ -1,0 +1,33 @@
+# sweep_config.yaml
+program: train_luq/run_train_luq.py  # The script you want to execute
+method: bayes
+metric:
+  name: eval/f1
+  goal: maximize
+parameters:
+  training_arguments.learning_rate:
+      values: [5e-4, 1e-4, 5e-5, 1e-5]
+  training_arguments.warmup_ratio:
+      values: [0.0, 0.05, 0.1]
+  training_arguments.num_train_epochs:
+      values: [2, 3, 4, 5, 6]
+  ue_layer.head_config.n_layers:
+        values: [1, 2]
+  ue_layer.head_config.n_heads:
+        values: [16, 32, 64]
+  ue_layer.pos_weight: 
+      values: [4, 5, 6, 7]
+  ue_layer.head_config.interim_dim: 
+      values: [512, 1024, 2048]
+  ue_layer.feature_extractors.0.layer_nums:
+      values: [[-1], [-1, -5], [-1, -5, -16]]
+  ue_layer.feature_extractors.1.layer_nums:
+      values: [[-1], [-1, -5], [-1, -5, -10, -16, -20, -25], [-1, -2, -3, -4, -5, -10, -16, -20, -25]]
+  ue_layer.feature_extractors.2.top_n: 
+      values: [3, 4, 5, 6, 7]
+command:
+  - ${interpreter}
+  - ${program}
+  - --config-path=../configs
+  - --config-name=run_train_luq.yaml
+  - ${args_no_hyphens}
